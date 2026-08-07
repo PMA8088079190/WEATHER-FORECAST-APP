@@ -26,3 +26,4 @@ This project has several practical applications. Travelers can check the weather
 The Weather Forecast Web Application is an excellent example of integrating frontend technologies with web APIs to create a real-world application. It helps students improve their knowledge of web development, API integration, responsive design, and JavaScript programming. Overall, this project is simple, efficient, visually attractive, and highly useful for everyday weather monitoring. It serves as a strong foundation for developing more advanced weather applications and demonstrates the practical implementation of modern web development concepts.
 
 output*:
+<img width="1872" height="894" alt="Image" src="https://github.com/user-attachments/assets/c4be1c06-10f7-4dc3-8467-0ac56cdef75a" />
