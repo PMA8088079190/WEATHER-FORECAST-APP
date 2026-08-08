@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WeatherNow — Forecast App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #EFF4FB;
+    --surface: #FFFFFF;
+    --surface2: #E8EFF8;
+    --border: rgba(0,0,0,0.07);
+    --border-strong: rgba(0,0,0,0.13);
+    --text: #111827;
+    --text-muted: #6B7280;
+    --text-hint: #9CA3AF;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --blue-mid: #378ADD;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F1923;
+      --surface: #18242F;
+      --surface2: #1F2E3C;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+      --text: #E8EFF8;
+      --text-muted: #8BA3BF;
+      --text-hint: #4D6880;
+      --blue: #5B9FE8;
+      --blue-light: #162336;
+      --blue-mid: #378ADD;
+    }
+  }
+
+  body {
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .app {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .app-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .app-title span {
+    color: var(--blue);
+  }
+
+  /* Search */
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Outfit', sans-serif;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .search-input:focus {
+    border-color: var(--blue-mid);
+    box-shadow: 0 0 0 3px rgba(55,138,221,0.15);
+  }
+
+  .search-input::placeholder { color: var(--text-hint); }
+
+  .btn {
+    padding: 11px 20px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--surface2); }
+  .btn:active { transform: scale(0.97); }
+
+  .btn.primary {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+
+  .btn.primary:hover { opacity: 0.88; background: var(--blue); }
+
+  /* Unit Toggle */
+  .unit-toggle {
+    display: flex;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .unit-btn {
+    padding: 5px 12px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+
+  .unit-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    border: 0.5px solid var(--border-strong);
+  }
+
+  /* Hero Card */
+  .hero-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .hero-left .city-name {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .hero-left .region-name {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-left .temp-main {
+    font-size: 64px;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -3px;
+  }
+
+  .hero-left .feels-like {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .hero-right { text-align: right; }
+
+  .weather-emoji {
+    font-size: 64px;
+    line-height: 1;
+    display: block;
+  }
+
+  .condition-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  /* Metrics Grid */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 540px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .metric-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px 15px;
+  }
+
+  .m-label {
+    font-size: 11px;
+    color: var(--text-hint);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .m-val {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .m-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* UV / AQI bars */
+  .bar-wrap {
+    height: 5px;
+    border-radius: 3px;
+    margin: 7px 0 4px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .uv-bar-bg { background: linear-gradient(to right, #639922, #EF9F27, #E24B4A, #A32D2D); border-radius: 3px; height: 100%; }
+  .aqi-bar-bg { background: linear-gradient(to right, #4BB87A, #E8A040, #E24B4A); border-radius: 3px; height: 100%; }
+
+  .bar-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 2px solid var(--surface2);
+    position: absolute;
+    top: -2.5px;
+    transform: translateX(-50%);
+    transition: left 0.4s ease;
+  }
+
+  .bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-hint);
+  }
+
+  /* Extras grid */
+  .extras-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  /* Section Label */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    padding-left: 2px;
+  }
+
+  /* Hourly Row */
+  .hourly-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 1.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .hourly-row::-webkit-scrollbar { height: 3px; }
+  .hourly-row::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+  .hour-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 66px;
+    transition: border-color 0.15s;
+  }
+
+  .hour-card.now {
+    border-color: var(--blue-mid);
+    background: var(--blue-light);
+  }
+
+  .h-time { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+  .h-icon { font-size: 24px; margin-bottom: 5px; }
+  .h-temp { font-size: 14px; font-weight: 500; }
+
+  /* Forecast */
+  .forecast-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .forecast-item {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .f-day {
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 68px;
+  }
+
+  .f-icon { font-size: 22px; flex-shrink: 0; }
+
+  .f-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  .f-rain {
+    font-size: 11px;
+    color: var(--blue-mid);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 36px;
+  }
+
+  .f-temps {
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    gap: 10px;
+  }
+
+  .f-lo { color: var(--text-muted); font-weight: 400; }
+
+  /* Sun row */
+  .sun-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  /* City pills */
+  .city-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .city-pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .city-pill:hover {
+    background: var(--blue-light);
+    color: var(--blue);
+    border-color: var(--blue-mid);
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .hero-left .temp-main { font-size: 48px; }
+    .weather-emoji { font-size: 48px; }
+    .forecast-item .f-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-title">Weather<span>Now</span></div>
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="btn-c" onclick="setUnit('C')">°C</button>
+      <button class="unit-btn" id="btn-f" onclick="setUnit('F')">°F</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input class="search-input" id="city-input" type="text" placeholder="Search for a city…" value="Bengaluru, Karnataka"/>
+    <button class="btn primary" onclick="loadCity()" aria-label="Search weather">
+      <i class="ti ti-search" aria-hidden="true"></i> Search
+    </button>
+  </div>
+
+  <!-- Quick city pills -->
+  <div class="city-pills">
+    <button class="city-pill" onclick="quickCity('bengaluru')">Bengaluru</button>
+    <button class="city-pill" onclick="quickCity('mumbai')">Mumbai</button>
+    <button class="city-pill" onclick="quickCity('delhi')">New Delhi</button>
+    <button class="city-pill" onclick="quickCity('london')">London</button>
+    <button class="city-pill" onclick="quickCity('new york')">New York</button>
+    <button class="city-pill" onclick="quickCity('tokyo')">Tokyo</button>
+  </div>
+
+  <!-- Hero Card -->
+  <div class="hero-card">
+    <div class="hero-left">
+      <div class="city-name" id="h-city">Bengaluru</div>
+      <div class="region-name" id="h-region">Karnataka, India · <span id="h-time"></span></div>
+      <div class="temp-main" id="h-temp">28°</div>
+      <div class="feels-like" id="h-feels">Feels like 31°</div>
+    </div>
+    <div class="hero-right">
+      <span class="weather-emoji" id="h-icon">⛅</span>
+      <div class="condition-text" id="h-cond">Partly cloudy</div>
+    </div>
+  </div>
+
+  <!-- 4 Metrics -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-droplet" style="font-size:13px" aria-hidden="true"></i>Humidity</div>
+      <div class="m-val" id="m-hum">68%</div>
+      <div class="m-sub" id="m-hum-sub">Moderately humid</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-wind" style="font-size:13px" aria-hidden="true"></i>Wind</div>
+      <div class="m-val" id="m-wind">14 km/h</div>
+      <div class="m-sub" id="m-wdir">SW direction</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-eye" style="font-size:13px" aria-hidden="true"></i>Visibility</div>
+      <div class="m-val" id="m-vis">10 km</div>
+      <div class="m-sub">Clear view</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-gauge" style="font-size:13px" aria-hidden="true"></i>Pressure</div>
+      <div class="m-val" id="m-pres">1012</div>
+      <div class="m-sub">hPa · stable</div>
+    </div>
+  </div>
+
+  <!-- UV & AQI -->
+  <div class="extras-grid">
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-sun" style="font-size:13px" aria-hidden="true"></i>UV Index</div>
+      <div class="m-val" id="m-uv">7 · High</div>
+      <div class="bar-wrap">
+        <div class="uv-bar-bg"></div>
+        <div class="bar-dot" id="uv-dot" style="left:58%"></div>
+      </div>
+      <div class="bar-labels"><span>Low</span><span>Moderate</span><span>High</span><span>Extreme</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-leaf" style="font-size:13px" aria-hidden="true"></i>Air Quality</div>
+      <div class="m-val" id="m-aqi">AQI 82 · Moderate</div>
+      <div class="bar-wrap">
+        <div class="aqi-bar-bg"></div>
+        <div class="bar-dot" id="aqi-dot" style="left:27%"></div>
+      </div>
+      <div class="bar-labels"><span>Good</span><span>Moderate</span><span>Poor</span></div>
+    </div>
+  </div>
+
+  <!-- Hourly -->
+  <div class="section-label">Hourly forecast</div>
+  <div class="hourly-row" id="hourly-row" role="list"></div>
+
+  <!-- 7-Day -->
+  <div class="section-label">7-day forecast</div>
+  <div class="forecast-list" id="forecast-list" role="list"></div>
+
+  <!-- Sunrise / Sunset -->
+  <div class="sun-grid">
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-sunrise" style="font-size:13px" aria-hidden="true"></i>Sunrise</div>
+      <div class="m-val" id="m-rise">06:02 AM</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label"><i class="ti ti-sunset" style="font-size:13px" aria-hidden="true"></i>Sunset</div>
+      <div class="m-val" id="m-set">06:34 PM</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const CITIES = {
+    'bengaluru': {
+      city:'Bengaluru', region:'Karnataka, India', tempC:28, feelsC:31,
+      cond:'Partly cloudy', icon:'⛅', hum:68, wind:14, wdir:'SW', vis:10, pres:1012,
+      uv:7, aqi:82, rise:'06:02 AM', set:'06:34 PM',
+      hourly:[{t:'Now',i:'⛅',c:28},{t:'1 PM',i:'🌤',c:30},{t:'2 PM',i:'☀️',c:31},{t:'3 PM',i:'☀️',c:31},{t:'4 PM',i:'🌤',c:30},{t:'5 PM',i:'⛅',c:28},{t:'6 PM',i:'🌥',c:26},{t:'7 PM',i:'🌧',c:24},{t:'8 PM',i:'🌧',c:23},{t:'9 PM',i:'🌦',c:22}],
+      forecast:[{d:'Today',i:'⛅',c:'Partly cloudy',hi:31,lo:21,rain:20},{d:'Monday',i:'🌧',c:'Showers',hi:27,lo:20,rain:70},{d:'Tuesday',i:'🌦',c:'Light rain',hi:26,lo:19,rain:55},{d:'Wednesday',i:'☀️',c:'Sunny',hi:32,lo:22,rain:5},{d:'Thursday',i:'🌤',c:'Mostly sunny',hi:33,lo:23,rain:10},{d:'Friday',i:'⛅',c:'Partly cloudy',hi:30,lo:21,rain:25},{d:'Saturday',i:'🌧',c:'Thunderstorms',hi:25,lo:19,rain:80}]
+    },
+    'mumbai': {
+      city:'Mumbai', region:'Maharashtra, India', tempC:33, feelsC:38,
+      cond:'Hot & humid', icon:'🌤', hum:82, wind:22, wdir:'W', vis:8, pres:1006,
+      uv:9, aqi:120, rise:'06:08 AM', set:'07:12 PM',
+      hourly:[{t:'Now',i:'🌤',c:33},{t:'1 PM',i:'☀️',c:35},{t:'2 PM',i:'☀️',c:36},{t:'3 PM',i:'🌤',c:35},{t:'4 PM',i:'⛅',c:33},{t:'5 PM',i:'🌥',c:31},{t:'6 PM',i:'🌦',c:29},{t:'7 PM',i:'🌧',c:28},{t:'8 PM',i:'🌧',c:27},{t:'9 PM',i:'🌦',c:27}],
+      forecast:[{d:'Today',i:'🌤',c:'Hot & humid',hi:36,lo:27,rain:15},{d:'Monday',i:'🌧',c:'Heavy rain',hi:30,lo:26,rain:85},{d:'Tuesday',i:'🌧',c:'Thunderstorms',hi:29,lo:25,rain:90},{d:'Wednesday',i:'🌦',c:'Light showers',hi:31,lo:26,rain:60},{d:'Thursday',i:'🌤',c:'Partly cloudy',hi:34,lo:27,rain:20},{d:'Friday',i:'☀️',c:'Sunny',hi:36,lo:28,rain:5},{d:'Saturday',i:'🌤',c:'Mostly sunny',hi:35,lo:27,rain:10}]
+    },
+    'delhi': {
+      city:'New Delhi', region:'Delhi, India', tempC:40, feelsC:44,
+      cond:'Hot & dry', icon:'☀️', hum:25, wind:10, wdir:'NW', vis:6, pres:998,
+      uv:11, aqi:185, rise:'05:25 AM', set:'07:22 PM',
+      hourly:[{t:'Now',i:'☀️',c:40},{t:'1 PM',i:'☀️',c:42},{t:'2 PM',i:'☀️',c:43},{t:'3 PM',i:'☀️',c:42},{t:'4 PM',i:'🌤',c:40},{t:'5 PM',i:'🌤',c:38},{t:'6 PM',i:'⛅',c:35},{t:'7 PM',i:'⛅',c:33},{t:'8 PM',i:'🌙',c:31},{t:'9 PM',i:'🌙',c:30}],
+      forecast:[{d:'Today',i:'☀️',c:'Hot & dry',hi:43,lo:28,rain:2},{d:'Monday',i:'☀️',c:'Heatwave',hi:45,lo:30,rain:0},{d:'Tuesday',i:'🌤',c:'Very hot',hi:43,lo:29,rain:5},{d:'Wednesday',i:'⛅',c:'Partly cloudy',hi:39,lo:27,rain:10},{d:'Thursday',i:'🌦',c:'Thunderstorms',hi:35,lo:25,rain:60},{d:'Friday',i:'🌧',c:'Heavy rain',hi:32,lo:24,rain:80},{d:'Saturday',i:'🌤',c:'Partly cloudy',hi:36,lo:26,rain:20}]
+    },
+    'london': {
+      city:'London', region:'England, United Kingdom', tempC:17, feelsC:15,
+      cond:'Overcast', icon:'🌥', hum:78, wind:18, wdir:'SW', vis:12, pres:1018,
+      uv:3, aqi:42, rise:'04:48 AM', set:'09:17 PM',
+      hourly:[{t:'Now',i:'🌥',c:17},{t:'1 PM',i:'⛅',c:18},{t:'2 PM',i:'🌤',c:19},{t:'3 PM',i:'🌤',c:19},{t:'4 PM',i:'⛅',c:18},{t:'5 PM',i:'🌥',c:17},{t:'6 PM',i:'🌥',c:16},{t:'7 PM',i:'🌦',c:15},{t:'8 PM',i:'🌧',c:14},{t:'9 PM',i:'🌧',c:13}],
+      forecast:[{d:'Today',i:'🌥',c:'Overcast',hi:19,lo:12,rain:40},{d:'Monday',i:'🌧',c:'Rainy',hi:16,lo:11,rain:75},{d:'Tuesday',i:'🌦',c:'Showers',hi:15,lo:10,rain:60},{d:'Wednesday',i:'⛅',c:'Partly cloudy',hi:18,lo:12,rain:20},{d:'Thursday',i:'☀️',c:'Sunny spells',hi:21,lo:13,rain:5},{d:'Friday',i:'🌤',c:'Mostly sunny',hi:22,lo:14,rain:10},{d:'Saturday',i:'🌥',c:'Overcast',hi:18,lo:12,rain:35}]
+    },
+    'new york': {
+      city:'New York', region:'NY, United States', tempC:22, feelsC:24,
+      cond:'Clear & sunny', icon:'☀️', hum:55, wind:12, wdir:'NE', vis:16, pres:1020,
+      uv:6, aqi:58, rise:'05:28 AM', set:'08:21 PM',
+      hourly:[{t:'Now',i:'☀️',c:22},{t:'1 PM',i:'☀️',c:24},{t:'2 PM',i:'🌤',c:25},{t:'3 PM',i:'🌤',c:25},{t:'4 PM',i:'⛅',c:23},{t:'5 PM',i:'⛅',c:22},{t:'6 PM',i:'🌤',c:21},{t:'7 PM',i:'🌙',c:19},{t:'8 PM',i:'🌙',c:18},{t:'9 PM',i:'🌙',c:17}],
+      forecast:[{d:'Today',i:'☀️',c:'Clear',hi:25,lo:16,rain:5},{d:'Monday',i:'🌤',c:'Mostly sunny',hi:26,lo:17,rain:10},{d:'Tuesday',i:'⛅',c:'Partly cloudy',hi:24,lo:16,rain:20},{d:'Wednesday',i:'🌧',c:'Rainy',hi:20,lo:15,rain:70},{d:'Thursday',i:'🌦',c:'Showers',hi:21,lo:14,rain:55},{d:'Friday',i:'🌤',c:'Clearing up',hi:23,lo:15,rain:15},{d:'Saturday',i:'☀️',c:'Sunny',hi:27,lo:17,rain:5}]
+    },
+    'tokyo': {
+      city:'Tokyo', region:'Kanto, Japan', tempC:25, feelsC:27,
+      cond:'Warm & muggy', icon:'🌤', hum:72, wind:8, wdir:'SE', vis:10, pres:1010,
+      uv:5, aqi:65, rise:'04:23 AM', set:'07:00 PM',
+      hourly:[{t:'Now',i:'🌤',c:25},{t:'1 PM',i:'☀️',c:27},{t:'2 PM',i:'☀️',c:28},{t:'3 PM',i:'🌤',c:28},{t:'4 PM',i:'🌤',c:27},{t:'5 PM',i:'⛅',c:26},{t:'6 PM',i:'🌥',c:24},{t:'7 PM',i:'🌦',c:23},{t:'8 PM',i:'🌧',c:22},{t:'9 PM',i:'🌧',c:21}],
+      forecast:[{d:'Today',i:'🌤',c:'Warm & muggy',hi:28,lo:20,rain:20},{d:'Monday',i:'🌧',c:'Rainy season',hi:24,lo:19,rain:80},{d:'Tuesday',i:'🌧',c:'Heavy rain',hi:23,lo:18,rain:90},{d:'Wednesday',i:'🌦',c:'Showers',hi:25,lo:19,rain:65},{d:'Thursday',i:'⛅',c:'Partly cloudy',hi:27,lo:20,rain:25},{d:'Friday',i:'🌤',c:'Mostly sunny',hi:29,lo:21,rain:10},{d:'Saturday',i:'☀️',c:'Sunny',hi:30,lo:22,rain:5}]
+    }
+  };
+
+  let unit = 'C';
+  let current = CITIES['bengaluru'];
+
+  function toF(c) { return Math.round(c * 9 / 5 + 32); }
+  function fmt(c) { return unit === 'C' ? c + '°' : toF(c) + '°'; }
+
+  function setUnit(u) {
+    unit = u;
+    document.getElementById('btn-c').classList.toggle('active', u === 'C');
+    document.getElementById('btn-f').classList.toggle('active', u === 'F');
+    renderData(current);
+  }
+
+  function quickCity(key) {
+    document.getElementById('city-input').value = CITIES[key].city;
+    current = CITIES[key];
+    renderData(current);
+  }
+
+  function loadCity() {
+    const q = document.getElementById('city-input').value.trim().toLowerCase();
+    const key = Object.keys(CITIES).find(k => q.includes(k) || k.includes(q.split(',')[0].trim()));
+    if (key) {
+      current = CITIES[key];
+    } else {
+      current = { ...CITIES['bengaluru'], city: document.getElementById('city-input').value.trim() || 'Unknown City' };
+    }
+    renderData(current);
+  }
+
+  function humLabel(h) { return h < 40 ? 'Low humidity' : h < 60 ? 'Comfortable' : h < 75 ? 'Moderately humid' : 'Very humid'; }
+
+  function renderData(d) {
+    document.getElementById('h-city').textContent = d.city;
+    document.getElementById('h-region').innerHTML = d.region + ' · <span id="h-time"></span>';
+    document.getElementById('h-temp').textContent = fmt(d.tempC);
+    document.getElementById('h-feels').textContent = 'Feels like ' + fmt(d.feelsC);
+    document.getElementById('h-icon').textContent = d.icon;
+    document.getElementById('h-cond').textContent = d.cond;
+    document.getElementById('m-hum').textContent = d.hum + '%';
+    document.getElementById('m-hum-sub').textContent = humLabel(d.hum);
+    document.getElementById('m-wind').textContent = d.wind + ' km/h';
+    document.getElementById('m-wdir').textContent = d.wdir + ' direction';
+    document.getElementById('m-vis').textContent = d.vis + ' km';
+    document.getElementById('m-pres').textContent = d.pres;
+    const uvLabel = d.uv <= 2 ? 'Low' : d.uv <= 5 ? 'Moderate' : d.uv <= 7 ? 'High' : d.uv <= 10 ? 'Very high' : 'Extreme';
+    document.getElementById('m-uv').textContent = 'UV ' + d.uv + ' · ' + uvLabel;
+    document.getElementById('uv-dot').style.left = Math.min(93, Math.round(d.uv / 12 * 100)) + '%';
+    const aqiLabel = d.aqi <= 50 ? 'Good' : d.aqi <= 100 ? 'Moderate' : d.aqi <= 150 ? 'Sensitive groups' : 'Unhealthy';
+    document.getElementById('m-aqi').textContent = 'AQI ' + d.aqi + ' · ' + aqiLabel;
+    document.getElementById('aqi-dot').style.left = Math.min(93, Math.round(d.aqi / 300 * 100)) + '%';
+    document.getElementById('m-rise').textContent = d.rise;
+    document.getElementById('m-set').textContent = d.set;
+
+    document.getElementById('hourly-row').innerHTML = d.hourly.map((h, i) => `
+      <div class="hour-card ${i === 0 ? 'now' : ''}" role="listitem">
+        <div class="h-time">${h.t}</div>
+        <div class="h-icon">${h.i}</div>
+        <div class="h-temp">${fmt(h.c)}</div>
+      </div>`).join('');
+
+    document.getElementById('forecast-list').innerHTML = d.forecast.map(f => `
+      <div class="forecast-item" role="listitem">
+        <div class="f-day">${f.d}</div>
+        <div class="f-icon">${f.i}</div>
+        <div class="f-desc">${f.c}</div>
+        <div class="f-rain"><i class="ti ti-droplet" style="font-size:11px" aria-hidden="true"></i>${f.rain}%</div>
+        <div class="f-temps">
+          <span class="f-hi">${fmt(f.hi)}</span>
+          <span class="f-lo">${fmt(f.lo)}</span>
+        </div>
+      </div>`).join('');
+
+    updateClock();
+  }
+
+  function updateClock() {
+    const el = document.getElementById('h-time');
+    if (el) el.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  document.getElementById('city-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadCity();
+  });
+
+  renderData(current);
+  setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
